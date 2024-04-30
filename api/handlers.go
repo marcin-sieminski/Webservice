@@ -1,9 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
+
+	"github.com/marcin-sieminski/webservice/data"
 )
 
 func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
@@ -11,56 +15,133 @@ func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
-	fmt.Fprintln(w, "status: available")
-	fmt.Fprintf(w, "environment: %s\n", app.config.env)
-	fmt.Fprintf(w, "version: %s\n", version)
+
+	data := map[string]string{
+		"status":      "available",
+		"environment": app.config.env,
+		"version":     version,
+	}
+
+	js, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	js = append(js, '\n')
+
+	w.Header().Set("Content-Type", "application/json")
+
+	w.Write(js)
 }
 
-func (app *application) getCreateItemsHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) getCreateHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		fmt.Fprintln(w, "Display a list of the items")
-		return
+		items := []data.Item{
+			{
+				ID:        1,
+				CreatedAt: time.Now(),
+				Name:      "Name1",
+				Version:   1,
+			},
+			{
+				ID:        2,
+				CreatedAt: time.Now(),
+				Name:      "Name2",
+				Version:   1,
+			},
+		}
+
+		if err := app.writeJSON(w, http.StatusOK, envelope{"items": items}); err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 	}
 	if r.Method == http.MethodPost {
-		fmt.Fprintln(w, "Added a new item")
-		return
+		var input struct {
+			Name string `json:"name"`
+		}
+
+		err := app.readJSON(w, r, &input)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		fmt.Fprintf(w, "%+v\n", input)
 	}
 }
 
-func (app *application) getUpdateDeleteItemsHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) getUpdateDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		app.getItem(w, r)
+		app.get(w, r)
 	case http.MethodPut:
-		app.updateItem(w, r)
+		app.update(w, r)
 	case http.MethodDelete:
-		app.deleteItem(w, r)
+		app.delete(w, r)
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
 }
 
-func (app *application) getItem(w http.ResponseWriter, r *http.Request) {
+func (app *application) get(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/v1/items/"):]
 	idInt, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintf(w, "Display the details of a specific item with ID: %d", idInt)
+
+	item := data.Item{
+		ID:        idInt,
+		CreatedAt: time.Now(),
+		Name:      "Name1",
+		Version:   1,
+	}
+
+	if err := app.writeJSON(w, http.StatusOK, envelope{"item": item}); err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 }
 
-func (app *application) updateItem(w http.ResponseWriter, r *http.Request) {
+func (app *application) update(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/v1/items/"):]
 	idInt, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintf(w, "Update the details of a specific item with ID: %d", idInt)
+
+	var input struct {
+		Name *string `json:"name"`
+	}
+
+	item := data.Item{
+		ID:        idInt,
+		CreatedAt: time.Now(),
+		Name:      "Name1",
+		Version:   1,
+	}
+
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	if input.Name != nil {
+		item.Name = *input.Name
+	}
+
+	if err := app.writeJSON(w, http.StatusOK, envelope{"item": item}); err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 }
 
-func (app *application) deleteItem(w http.ResponseWriter, r *http.Request) {
+func (app *application) delete(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/v1/items/"):]
 	idInt, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
