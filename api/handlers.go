@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/marcin-sieminski/webservice/data"
 )
@@ -37,26 +37,18 @@ func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) getCreateHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		items := []data.Item{
-			{
-				ID:        1,
-				CreatedAt: time.Now(),
-				Name:      "Name1",
-				Version:   1,
-			},
-			{
-				ID:        2,
-				CreatedAt: time.Now(),
-				Name:      "Name2",
-				Version:   1,
-			},
+		items, err := app.models.Items.GetAll()
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
-		if err := app.writeJSON(w, http.StatusOK, envelope{"items": items}); err != nil {
+		if err := app.writeJSON(w, http.StatusOK, envelope{"items": items}, nil); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 	}
+
 	if r.Method == http.MethodPost {
 		var input struct {
 			Name string `json:"name"`
@@ -67,8 +59,24 @@ func (app *application) getCreateHandler(w http.ResponseWriter, r *http.Request)
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
+		item := &data.Item{
+			Name: input.Name,
+		}
 
-		fmt.Fprintf(w, "%+v\n", input)
+		err = app.models.Items.Insert(item)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		headers := make(http.Header)
+		headers.Set("Location", fmt.Sprintf("v1/items/%d", item.ID))
+
+		err = app.writeJSON(w, http.StatusCreated, envelope{"item": item}, headers)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
@@ -93,14 +101,18 @@ func (app *application) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item := data.Item{
-		ID:        idInt,
-		CreatedAt: time.Now(),
-		Name:      "Name1",
-		Version:   1,
+	item, err := app.models.Items.Get(idInt)
+	if err != nil {
+		switch {
+		case errors.Is(err, errors.New("record not found")):
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		default:
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		return
 	}
 
-	if err := app.writeJSON(w, http.StatusOK, envelope{"item": item}); err != nil {
+	if err := app.writeJSON(w, http.StatusOK, envelope{"item": item}, nil); err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -114,15 +126,18 @@ func (app *application) update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	item, err := app.models.Items.Get(idInt)
+	if err != nil {
+		switch {
+		case errors.Is(err, errors.New("record not found")):
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		default:
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		return
+	}
 	var input struct {
 		Name *string `json:"name"`
-	}
-
-	item := data.Item{
-		ID:        idInt,
-		CreatedAt: time.Now(),
-		Name:      "Name1",
-		Version:   1,
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -135,7 +150,13 @@ func (app *application) update(w http.ResponseWriter, r *http.Request) {
 		item.Name = *input.Name
 	}
 
-	if err := app.writeJSON(w, http.StatusOK, envelope{"item": item}); err != nil {
+	err = app.models.Items.Update(item)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	if err := app.writeJSON(w, http.StatusOK, envelope{"item": item}, nil); err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -148,5 +169,21 @@ func (app *application) delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintf(w, "Delete a specific item with ID: %d", idInt)
+
+	err = app.models.Items.Delete(idInt)
+	if err != nil {
+		switch {
+		case errors.Is(err, errors.New("record not found")):
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		default:
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "item successfully deleted"}, nil)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 }
