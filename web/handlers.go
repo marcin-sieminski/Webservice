@@ -22,7 +22,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintf(w, "<html><head><title>Items List</title></head><body><h1>Items List</h1><ul>")
 	for _, item := range *items {
-		fmt.Fprintf(w, "<li>%s (%d)</li>", item.Name)
+		fmt.Fprintf(w, "<li>%s</li>", item.Name)
 	}
 	fmt.Fprintf(w, "</ul></body></html>")
 }
@@ -40,7 +40,7 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%s (%d)\n", item.Name)
+	fmt.Fprintf(w, "%s\n", item.Name)
 }
 
 func (app *application) itemCreate(w http.ResponseWriter, r *http.Request) {
