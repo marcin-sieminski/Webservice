@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"text/template"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -20,11 +21,26 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, "<html><head><title>Items List</title></head><body><h1>Items List</h1><ul>")
-	for _, item := range *items {
-		fmt.Fprintf(w, "<li>%s</li>", item.Name)
+
+	files := []string{
+		"../ui/html/base.html",
+		"../ui/html/partials/nav.html",
+		"../ui/html/pages/home.html",
 	}
-	fmt.Fprintf(w, "</ul></body></html>")
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", items)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal server error", 500)
+		return
+	}
 }
 
 func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
