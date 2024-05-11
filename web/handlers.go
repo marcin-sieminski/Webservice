@@ -3,10 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"text/template"
 )
 
@@ -56,7 +56,27 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%s\n", item.Name)
+	files := []string{
+		"../ui/html/base.html",
+		"../ui/html/partials/nav.html",
+		"../ui/html/pages/view.html",
+	}
+
+	funcs := template.FuncMap{"join": strings.Join}
+
+	ts, err := template.New("showItem").Funcs(funcs).ParseFiles(files...)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", item)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
 }
 
 func (app *application) itemCreate(w http.ResponseWriter, r *http.Request) {
@@ -72,18 +92,35 @@ func (app *application) itemCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) itemCreateForm(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<html><head><title>Create Item</title></head>"+
-		"<body><h1>Create Item</h1><form action=\"/item/create\" method=\"post\">"+
-		"<label for=\name\">Name</label><input type=\"text\" name=\"name\" id=\"name\">"+
-		"<button type=\"submit\">Create</button></form></body></html>")
+	files := []string{
+		"../ui/html/base.html",
+		"../ui/html/partials/nav.html",
+		"../ui/html/pages/create.html",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+	err = ts.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
 }
 
 func (app *application) itemCreateProcess(w http.ResponseWriter, r *http.Request) {
-	name := r.PostFormValue("name")
-	if name == "" {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
+
+	name := r.PostForm.Get("name")
 
 	item := struct {
 		Name string `json:"name"`

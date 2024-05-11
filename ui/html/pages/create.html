@@ -1,0 +1,11 @@
+{{define "title"}}Create a New Item{{end}}
+
+{{define "main"}}
+<form action='/item/create' method='Post'>
+  <label>Name:</label>
+  <input type="text" name="name"><br>
+  <div class="button-center">
+    <button type="submit">Submit</button>
+  </div>  
+</form>
+{{end}}
