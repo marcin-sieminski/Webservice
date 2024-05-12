@@ -5,11 +5,13 @@
     {{if .}}
     <table>
         <tr>
-            <th>Name</th>
+          <th>Id</th>
+          <th>Name</th>
         </tr>
         {{range .}}
         <tr>
-            <td><a href='/item/view?id={{.ID}}'>{{.Name}}</a></td>
+          <td><a href='/item/view?id={{.ID}}'>{{.ID}}</a></td>  
+          <td><a href='/item/view?id={{.ID}}'>{{.Name}}</a></td>
         </tr>
         {{end}}
     </table>
