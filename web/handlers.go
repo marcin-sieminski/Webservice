@@ -121,11 +121,14 @@ func (app *application) itemCreateProcess(w http.ResponseWriter, r *http.Request
 	}
 
 	name := r.PostForm.Get("name")
+	description := r.PostForm.Get("description")
 
 	item := struct {
-		Name string `json:"name"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
 	}{
-		Name: name,
+		Name:        name,
+		Description: description,
 	}
 
 	data, err := json.Marshal(item)

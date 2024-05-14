@@ -51,7 +51,8 @@ func (app *application) getCreateHandler(w http.ResponseWriter, r *http.Request)
 
 	if r.Method == http.MethodPost {
 		var input struct {
-			Name string `json:"name"`
+			Name        string `json:"name"`
+			Description string `json:"description"`
 		}
 
 		err := app.readJSON(w, r, &input)
@@ -60,7 +61,8 @@ func (app *application) getCreateHandler(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		item := &data.Item{
-			Name: input.Name,
+			Name:        input.Name,
+			Description: input.Description,
 		}
 
 		err = app.models.Items.Insert(item)
@@ -137,7 +139,8 @@ func (app *application) update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var input struct {
-		Name *string `json:"name"`
+		Name        *string `json:"name"`
+		Description *string `json:"description"`
 	}
 
 	err = app.readJSON(w, r, &input)
@@ -148,6 +151,7 @@ func (app *application) update(w http.ResponseWriter, r *http.Request) {
 
 	if input.Name != nil {
 		item.Name = *input.Name
+		item.Description = *input.Description
 	}
 
 	err = app.models.Items.Update(item)
