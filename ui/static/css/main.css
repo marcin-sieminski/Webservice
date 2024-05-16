@@ -48,7 +48,7 @@ header a:visited {
 nav ul {
   display: flex;
   flex-flow: row nowrap;
-  justify-content: right;
+  justify-content: left;
   list-style: none;
   background: #ffffff;
 }
