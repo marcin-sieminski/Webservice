@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/marcin-sieminski/webservice/models"
+	"github.com/marcin-sieminski/webservice/model"
 )
 
 type application struct {
-	itemslist *models.ItemslistModel
+	itemslist *model.ItemslistModel
 }
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 	endpoint := flag.String("endpoint", "http://localhost:4000/v1/items", "Endpoint for the items list web service")
 
 	app := &application{
-		itemslist: &models.ItemslistModel{Endpoint: *endpoint},
+		itemslist: &model.ItemslistModel{Endpoint: *endpoint},
 	}
 
 	srv := &http.Server{

@@ -23,9 +23,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := []string{
-		"../ui/html/base.html",
-		"../ui/html/partials/nav.html",
-		"../ui/html/pages/home.html",
+		"../view/html/base.html",
+		"../view/html/partials/nav.html",
+		"../view/html/pages/home.html",
 	}
 
 	ts, err := template.ParseFiles(files...)
@@ -57,9 +57,9 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := []string{
-		"../ui/html/base.html",
-		"../ui/html/partials/nav.html",
-		"../ui/html/pages/view.html",
+		"../view/html/base.html",
+		"../view/html/partials/nav.html",
+		"../view/html/pages/view.html",
 	}
 
 	funcs := template.FuncMap{"join": strings.Join}
@@ -93,9 +93,9 @@ func (app *application) itemCreate(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) itemCreateForm(w http.ResponseWriter, r *http.Request) {
 	files := []string{
-		"../ui/html/base.html",
-		"../ui/html/partials/nav.html",
-		"../ui/html/pages/create.html",
+		"../view/html/base.html",
+		"../view/html/partials/nav.html",
+		"../view/html/pages/create.html",
 	}
 
 	ts, err := template.ParseFiles(files...)
