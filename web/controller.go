@@ -79,6 +79,56 @@ func (app *application) itemView(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) itemDelete(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		app.itemDeleteForm(w, r)
+	case http.MethodPost:
+		app.itemDeleteProcess(w, r)
+	default:
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func (app *application) itemDeleteForm(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	item, err := app.itemslist.Get(int64(id))
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	files := []string{
+		"../view/html/base.html",
+		"../view/html/partials/nav.html",
+		"../view/html/pages/delete.html",
+	}
+
+	funcs := template.FuncMap{"join": strings.Join}
+
+	ts, err := template.New("showItem").Funcs(funcs).ParseFiles(files...)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", item)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+}
+
+func (app *application) itemDeleteProcess(w http.ResponseWriter, r *http.Request) {
+}
+
 func (app *application) itemCreate(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:

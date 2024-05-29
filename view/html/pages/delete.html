@@ -1,0 +1,15 @@
+{{define "title"}}Delete item  #{{.ID}}{{end}}
+
+{{define "main"}}
+
+<form action='/item/delete?id={{.ID}}' method='Delete'>
+  <p>Delete item #{{.ID}}?</p>
+  
+  <div class="button-center">
+    <a href='/item/delete?id={{.ID}}'>Yes</a>
+  </div> 
+  <div class="button-center">
+    <a href='/'>No</a>
+  </div>   
+</form>
+{{end}}
