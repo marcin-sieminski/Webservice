@@ -1,12 +1,15 @@
 {{define "title"}}Delete item  #{{.ID}}{{end}}
 
 {{define "main"}}
-<p>Delete item #{{.ID}}?</p>
-
-<form action='/item/delete?id={{.ID}}' method='post'>
-  <div class="button-center">
-    <button type="submit">Submit</button>
-  </div>  
-</form>
-
+<div>
+  <label>Delete item #</label>
+  <label id="itemId">{{.ID}}</label>
+  <label>?</label>
+</div>
+<div class="button-center">
+  <button type="button" onclick="deleteItem()">Yes</button>
+</div>  
+<div class="button-center">
+  <button type="button" onclick="home()">No</button>
+</div>  
 {{end}}
