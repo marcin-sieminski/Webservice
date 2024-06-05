@@ -161,7 +161,7 @@ func (app *application) itemDelete(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		app.itemDeleteForm(w, r)
-	case http.MethodPost:
+	case http.MethodDelete:
 		app.itemDeleteProcess(w, r)
 	default:
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -205,5 +205,23 @@ func (app *application) itemDeleteForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) itemDeleteProcess(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/item/view?"+r.URL.RawQuery, http.StatusSeeOther)
+	id := r.URL.RawQuery[len("id="):]
+	req, _ := http.NewRequest("DELETE", app.itemslist.Endpoint+"/"+id, nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("unexpected status: %s", resp.Status)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

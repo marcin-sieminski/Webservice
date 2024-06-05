@@ -1,16 +1,13 @@
 async function deleteItem(){        
-    const itemId = parseInt(document.querySelector(".delete-confirmation").getAttribute("data-item-id"))
-    const response = await fetch(`/item/delete?id=${itemId}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            id: itemId
-          })
-    })
+    const itemId = parseInt(document.querySelector(".delete-confirmation").getAttribute("data-item-id"));
+    await fetch(`http://localhost/item/delete?id=${itemId}`, { method: "DELETE" })
+        .then((response) => {
+            if(response.ok){
+                location.href = response.url;
+            }
+        })
 }
 
-function home(){
+async function home(){
     location.href = '/';    
 }
