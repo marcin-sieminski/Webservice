@@ -35,6 +35,11 @@ header a {
   text-decoration: none;
 }
 
+button a {
+  color: #34495E;
+  text-decoration: none;
+}
+
 h1 a:hover {
   text-decoration: none;
   color: #34495E;
@@ -79,6 +84,7 @@ table {
   border: 1px solid #E4E5E7;
   border-collapse: collapse;
   width: 100%;
+  justify-self: center;
 }
 
 td, th {
@@ -135,10 +141,20 @@ footer a:hover {
 button {
   border: 1px solid black;
   padding: 5px;
+  margin: 5px;
   text-align: center;
+}
+
+.delete-confirmation {
+  display: block;  
 }
 
 .button-center {
   display: flex;
   justify-content: center;
+  margin: 5px;    
+}
+
+.create-form {
+  display: block;  
 }

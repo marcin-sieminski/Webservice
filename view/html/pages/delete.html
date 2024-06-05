@@ -1,15 +1,11 @@
 {{define "title"}}Delete item  #{{.ID}}{{end}}
 
 {{define "main"}}
-<div>
-  <label>Delete item #</label>
-  <label id="itemId">{{.ID}}</label>
-  <label>?</label>
-</div>
-<div class="button-center">
-  <button type="button" onclick="deleteItem()">Yes</button>
-</div>  
-<div class="button-center">
-  <button type="button" onclick="home()">No</button>
+<div class="delete-confirmation" data-item-id="{{.ID}}">
+  <label>Delete item #{{.ID}}?</label>
+  <div class="button-center">
+    <button  type="button" onclick="deleteItem(event)">Yes</button>  
+    <button class="button-center" type="button" onclick="home()">No</button>  
+  </div> 
 </div>  
 {{end}}
