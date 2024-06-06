@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -140,7 +141,7 @@ func (app *application) itemCreateProcess(w http.ResponseWriter, r *http.Request
 	req, _ := http.NewRequest("POST", app.itemslist.Endpoint, bytes.NewBuffer(data))
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: time.Second * 10}
 	resp, err := client.Do(req)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -209,7 +210,7 @@ func (app *application) itemDeleteProcess(w http.ResponseWriter, r *http.Request
 	req, _ := http.NewRequest("DELETE", app.itemslist.Endpoint+"/"+id, nil)
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: time.Second * 10}
 	resp, err := client.Do(req)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
