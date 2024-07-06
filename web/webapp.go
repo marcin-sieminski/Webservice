@@ -14,7 +14,7 @@ type application struct {
 
 func main() {
 	addr := flag.String("addr", ":80", "HTTP network address")
-	endpoint := flag.String("endpoint", "http://localhost:4000/v1/items", "Endpoint for the items list web service")
+	endpoint := flag.String("endpoint", "http://localhost:4000/v1/item", "Endpoint for the items list web service")
 
 	app := &application{
 		itemslist: &model.ItemslistModel{Endpoint: *endpoint},

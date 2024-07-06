@@ -35,7 +35,7 @@ func main() {
 	flag.StringVar(&cfg.dsn, "db-dsn", os.Getenv("ITEMS_DB_DSN"), "PostgreSQL DSN")
 	flag.Parse()
 
-	cfg.dsn = fmt.Sprintf("postgres://postgres:%s@localhost/items?sslmode=disable", os.Getenv("ITEMS_DB_PASSWORD"))
+	cfg.dsn = fmt.Sprintf("postgres://%s:%s@localhost/items?sslmode=disable", os.Getenv("ITEMS_DB_USERNAME"), os.Getenv("ITEMS_DB_PASSWORD"))
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 

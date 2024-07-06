@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	endpoint = flag.String("endpoint", "http://localhost:4000/v1/items", "Endpoint for the items list web service")
+	endpoint = flag.String("endpoint", "http://localhost:4000/v1/item", "Endpoint for the items list web service")
 )
 
 type application struct {

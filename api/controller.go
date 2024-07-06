@@ -72,7 +72,7 @@ func (app *application) getCreateHandler(w http.ResponseWriter, r *http.Request)
 		}
 
 		headers := make(http.Header)
-		headers.Set("Location", fmt.Sprintf("v1/items/%d", item.ID))
+		headers.Set("Location", fmt.Sprintf("v1/item/%d", item.ID))
 
 		err = app.writeJSON(w, http.StatusCreated, envelope{"item": item}, headers)
 		if err != nil {
@@ -96,7 +96,7 @@ func (app *application) getUpdateDeleteHandler(w http.ResponseWriter, r *http.Re
 }
 
 func (app *application) get(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len("/v1/items/"):]
+	id := r.URL.Path[len("/v1/item/"):]
 	idInt, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
@@ -121,7 +121,7 @@ func (app *application) get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) update(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len("/v1/items/"):]
+	id := r.URL.Path[len("/v1/item/"):]
 	idInt, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
@@ -167,7 +167,7 @@ func (app *application) update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) delete(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len("/v1/items/"):]
+	id := r.URL.Path[len("/v1/item/"):]
 	idInt, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
