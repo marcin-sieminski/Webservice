@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	endpoint = flag.String("endpoint", "http://localhost:4000/v1/item", "Endpoint for the items list web service")
+	endpoint  = flag.String("endpoint", "http://localhost:4000/v1/item", "Endpoint for the items list web service")
+	blackhole *[]model.Item
 )
 
 type application struct {
@@ -23,10 +24,11 @@ func BenchmarkApi(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		b.StartTimer()
-		_, err := app.itemslist.GetAll()
+		result, err := app.itemslist.GetAll()
 		b.StopTimer()
 		if err != nil {
 			b.Fatal("api error")
 		}
+		blackhole = result
 	}
 }
