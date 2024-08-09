@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 )
 
@@ -28,10 +26,8 @@ func api(w http.ResponseWriter, r *http.Request) {
 }
 
 func runServer(port int) {
-	http.HandleFunc("/api", api)
-	if err := http.ListenAndServe(fmt.Sprintf("localhost:%d", port), nil); err != nil {
-		panic(err)
-	}
+	http.HandleFunc("/api-bench", api)
+	http.ListenAndServe(fmt.Sprintf("localhost:%d", port), nil)
 }
 
 func send(api string, value int, ch chan<- int) {
@@ -50,27 +46,27 @@ func send(api string, value int, ch chan<- int) {
 	}
 }
 
-func main() {
-	n := 10
-	if len(os.Args) > 1 {
-		n, _ = strconv.Atoi(os.Args[1])
-	}
-	_ = n
+type Payload struct {
+	Value int `json:"value"`
+}
+
+func run() {
+	sampleCount := 3000
 	rand.Seed(time.Now().UTC().UnixNano())
 	port := 20000 + rand.Intn(30000)
 	go runServer(port)
-	api := fmt.Sprintf("http://localhost:%d/api", port)
-	ch := make(chan int, n)
-	for i := 1; i <= n; i++ {
+	api := fmt.Sprintf("http://localhost:%d/api-bench", port)
+	ch := make(chan int, sampleCount)
+	for i := 1; i <= sampleCount; i++ {
 		go send(api, i, ch)
 	}
 	sum := 0
-	for i := 1; i <= n; i++ {
+	for i := 1; i <= sampleCount; i++ {
 		sum += <-ch
 	}
 	fmt.Println(sum)
 }
 
-type Payload struct {
-	Value int `json:"value"`
+func main() {
+	run()
 }
