@@ -1,4 +1,4 @@
-package main
+package benchmark
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"testing"
 	"time"
 )
 
@@ -13,7 +14,16 @@ var (
 	client = http.Client{
 		Timeout: 10 * time.Second,
 	}
+	port                int
+	blackholehttpserver int
 )
+
+func init() {
+	fmt.Println("init")
+	rand.Seed(time.Now().UTC().UnixNano())
+	port = 20000 + rand.Intn(30000)
+	go runServer(port)
+}
 
 func api(w http.ResponseWriter, r *http.Request) {
 	n := -1
@@ -28,6 +38,10 @@ func api(w http.ResponseWriter, r *http.Request) {
 func runServer(port int) {
 	http.HandleFunc("/api-bench", api)
 	http.ListenAndServe(fmt.Sprintf("localhost:%d", port), nil)
+}
+
+type Payload struct {
+	Value int `json:"value"`
 }
 
 func send(api string, value int, ch chan<- int) {
@@ -46,15 +60,8 @@ func send(api string, value int, ch chan<- int) {
 	}
 }
 
-type Payload struct {
-	Value int `json:"value"`
-}
-
-func run() {
-	sampleCount := 3000
-	rand.Seed(time.Now().UTC().UnixNano())
-	port := 20000 + rand.Intn(30000)
-	go runServer(port)
+func run() (int, error) {
+	sampleCount := 1
 	api := fmt.Sprintf("http://localhost:%d/api-bench", port)
 	ch := make(chan int, sampleCount)
 	for i := 1; i <= sampleCount; i++ {
@@ -64,9 +71,18 @@ func run() {
 	for i := 1; i <= sampleCount; i++ {
 		sum += <-ch
 	}
-	fmt.Println(sum)
+	return sum, nil
 }
 
-func main() {
-	run()
+func BenchmarkHttpServer(b *testing.B) {
+	b.StopTimer()
+	for i := 0; i < b.N; i++ {
+		b.StartTimer()
+		result, err := run()
+		b.StopTimer()
+		if err != nil {
+			b.Fatal("httpserver error")
+		}
+		blackholehttpserver = result
+	}
 }
