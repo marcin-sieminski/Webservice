@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/marcin-sieminski/webservice/model"
+	"github.com/marcin-sieminski/Webservice/model"
 )
 
 type application struct {

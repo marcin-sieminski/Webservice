@@ -4,7 +4,7 @@ import (
 	"flag"
 	"testing"
 
-	"github.com/marcin-sieminski/webservice/model"
+	"github.com/marcin-sieminski/Webservice/model"
 )
 
 var (

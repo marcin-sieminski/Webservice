@@ -10,7 +10,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-	"github.com/marcin-sieminski/webservice/data"
+	"github.com/marcin-sieminski/Webservice/data"
 )
 
 const version = "1.0.0"

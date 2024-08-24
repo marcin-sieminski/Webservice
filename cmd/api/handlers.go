@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/marcin-sieminski/webservice/data"
+	"github.com/marcin-sieminski/Webservice/data"
 )
 
 func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
